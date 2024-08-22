@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Attestation de Stage</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="#" class="text-white text-2xl font-semibold">SRIT-DOC</a>
+            <div class="space-x-4 flex items-center">
+                <a href="#" class="text-white hover:text-yellow-300">Accueil</a>
+                <div class="relative dropdown">
+                    <button class="text-white hover:text-yellow-300 focus:outline-none flex items-center">
+                        Générer Document
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu absolute bg-white text-gray-800 mt-2 rounded-lg shadow-lg w-48">
+                        <a href="#attestation" class="block px-4 py-2 hover:bg-gray-100">Attestation de stage</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Rapport</a>
+                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Contrat</a>
+                    </div>
+                </div>
+                <button class="text-white hover:text-yellow-300 ml-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                    Déconnexion
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-8">
+        <!-- Formulaire d'Attestation de Stage -->
+        <section id="attestation" class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Générer une Attestation de Stage</h2>
+            <form id="attestation-form">
+                <div class="mb-4">
+                    <label for="nom" class="block text-gray-700">Nom du Stagiaire</label>
+                    <input type="text" id="nom" name="nom" class="w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="prenom" class="block text-gray-700">Prénom du Stagiaire</label>
+                    <input type="text" id="prenom" name="prenom" class="w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="entreprise" class="block text-gray-700">Entreprise</label>
+                    <input type="text" id="entreprise" name="entreprise" class="w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="dates" class="block text-gray-700">Dates du Stage</label>
+                    <input type="text" id="dates" name="dates" class="w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <button type="button" id="generate-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Prévisualiser Attestation</button>
+            </form>
+        </section>
+    </div>
+
+    <!-- Prévisualisation Modal -->
+    <div id="preview-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-3/4 max-w-4xl">
+            <h3 class="text-xl font-semibold mb-4">Prévisualisation de l'Attestation</h3>
+            <iframe id="pdf-preview" class="w-full h-80" src=""></iframe>
+            <div class="mt-4 flex justify-between">
+                <button id="close-preview" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">Fermer</button>
+                <button id="download-btn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Télécharger PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- jsPDF Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const entreprise = document.getElementById('entreprise').value;
+            const dates = document.getElementById('dates').value;
+
+            doc.setFontSize(16);
+            doc.text('Attestation de Stage', 10, 10);
+            doc.setFontSize(12);
+            doc.text(`Nous, soussignés, attestons que ${prenom} ${nom}`, 10, 20);
+            doc.text(`a effectué un stage au sein de l’entreprise ${entreprise}.`, 10, 30);
+            doc.text(`Ce stage a eu lieu du ${dates}.`, 10, 40);
+            doc.text('Durant cette période, le stagiaire a acquis de solides compétences et a contribué activement aux projets de l’entreprise.', 10, 50);
+            doc.text('Cette attestation est délivrée à la demande de l’intéressé pour servir et valoir ce que de droit.', 10, 60);
+            doc.text('Fait à [Ville], le [Date]', 10, 70);
+            doc.text('Signature:', 10, 80);
+            doc.text('_____________________________', 10, 90);
+            doc.text('Nom du Responsable', 10, 100);
+            doc.text('Fonction du Responsable', 10, 110);
+
+            // Convert the document to Data URL
+            const pdfData = doc.output('datauristring');
+
+            // Display preview in modal
+            document.getElementById('pdf-preview').src = pdfData;
+            document.getElementById('preview-modal').classList.remove('hidden');
+
+            // Handle download
+            document.getElementById('download-btn').addEventListener('click', () => {
+                doc.save('attestation_de_stage.pdf');
+            });
+
+            // Close modal
+            document.getElementById('close-preview').addEventListener('click', () => {
+                document.getElementById('preview-modal').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
